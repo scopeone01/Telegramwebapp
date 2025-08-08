@@ -106,8 +106,28 @@
         </div>
         <div class="status-item">
           <span class="icon">🌡️</span>
-          <span class="label">Wasser-Temp.</span>
+          <span class="label">Wasser-Temp. 1</span>
           <span class="value" id="status-ds-temp-1">-- °C</span>
+        </div>
+        <div class="status-item">
+          <span class="icon">🌡️</span>
+          <span class="label">Wasser-Temp. 2</span>
+          <span class="value" id="status-ds-temp-2">-- °C</span>
+        </div>
+        <div class="status-item">
+          <span class="icon">🌡️</span>
+          <span class="label">Wasser-Temp. 3</span>
+          <span class="value" id="status-ds-temp-3">-- °C</span>
+        </div>
+        <div class="status-item">
+          <span class="icon">🌡️</span>
+          <span class="label">Wasser-Temp. 4</span>
+          <span class="value" id="status-ds-temp-4">-- °C</span>
+        </div>
+        <div class="status-item">
+          <span class="icon">🌡️</span>
+          <span class="label">Wasser-Temp. 5</span>
+          <span class="value" id="status-ds-temp-5">-- °C</span>
         </div>
       </div>
        <div id="status-loading" class="status-loading-overlay hidden">
@@ -307,6 +327,10 @@
         if (st.aht_temp != null) document.getElementById('status-aht-temp').textContent = `${st.aht_temp} °C`;
         if (st.aht_hum != null) document.getElementById('status-aht-humid').textContent = `${st.aht_hum} %`;
         if (st.temp_1 != null) document.getElementById('status-ds-temp-1').textContent = `${st.temp_1} °C`;
+        if (st.temp_2 != null) document.getElementById('status-ds-temp-2').textContent = `${st.temp_2} °C`;
+        if (st.temp_3 != null) document.getElementById('status-ds-temp-3').textContent = `${st.temp_3} °C`;
+        if (st.temp_4 != null) document.getElementById('status-ds-temp-4').textContent = `${st.temp_4} °C`;
+        if (st.temp_5 != null) document.getElementById('status-ds-temp-5').textContent = `${st.temp_5} °C`;
         if (Array.isArray(st.relays)) {
           document.querySelectorAll('#relays .switch').forEach((sw, idx) => {
             if (st.relays[idx]) sw.classList.add('on');
