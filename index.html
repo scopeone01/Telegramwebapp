@@ -7,9 +7,64 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="index.css" />
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link rel="stylesheet" href="/index.css">
+  <style>
+    :root{color-scheme:light dark}
+    *{box-sizing:border-box}
+    body{font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;margin:0;padding:0;background:var(--tg-theme-bg-color,#0e1116);color:var(--tg-theme-text-color,#e6edf3)}
+    .container{max-width:920px;margin:0 auto;padding:16px}
+    .header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .title{display:flex;align-items:center;gap:10px}
+    .logo{font-size:26px}
+    h1{margin:0;font-size:20px}
+    .subtitle{opacity:.8;margin:0}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap}
+    .card{background:rgba(22,27,34,.85);backdrop-filter:blur(8px);border:1px solid #30363d;border-radius:14px;padding:16px;margin:12px 0}
+    .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .refresh-btn{background:#21262d;border:1px solid #30363d;color:inherit;border-radius:10px;padding:6px 10px;cursor:pointer}
+    .refresh-btn:hover{background:#2b3138}
+    .status-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+    .status-item{display:flex;flex-direction:column;gap:4px;background:#0e1116;border:1px solid #30363d;border-radius:12px;padding:10px}
+    .status-item .icon{font-size:16px}
+    .status-item .label{opacity:.8;font-size:12px}
+    .status-item .value{font-weight:600}
+    .status-loading-overlay{position:relative}
+    .status-loading-overlay.hidden{display:none}
+    .spinner{width:24px;height:24px;border:3px solid #30363d;border-top-color:#2ea043;border-radius:50%;animation:spin 1s linear infinite;margin-left:auto}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .segmented{display:inline-flex;background:#0e1116;border:1px solid #30363d;border-radius:12px;overflow:hidden}
+    .segment{padding:8px 12px;background:transparent;color:inherit;border:0;border-right:1px solid #30363d;cursor:pointer}
+    .segment:last-child{border-right:0}
+    .segment.active{background:#238636;color:#fff}
+    .chips{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{padding:8px 10px;background:#21262d;border:1px solid #30363d;border-radius:999px;cursor:pointer}
+    .chip:hover{background:#2b3138}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:8px}
+    .form-group{display:flex;flex-direction:column;gap:6px}
+    label{font-size:13px}
+    input{padding:10px;border-radius:10px;border:1px solid #30363d;background:#0e1116;color:inherit}
+    .btn{display:inline-block;padding:10px 12px;background:#21262d;color:inherit;border:1px solid #30363d;border-radius:12px;text-align:center;cursor:pointer}
+    .btn:hover{background:#2b3138}
+    .btn.primary{background:#238636;border-color:#2ea043;color:#fff}
+    .btn.primary:hover{background:#2ea043}
+    .hint{font-size:12px;opacity:.8}
+    /* Relay Switches */
+    .relay-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .relay{display:flex;align-items:center;justify-content:space-between;background:#0e1116;border:1px solid #30363d;border-radius:12px;padding:10px 12px}
+    .relay .meta{display:flex;align-items:center;gap:10px}
+    .relay .icon{font-size:18px}
+    .switch{position:relative;width:50px;height:28px;background:#30363d;border-radius:999px;cursor:pointer;transition:background .2s}
+    .switch.on{background:#2ea043}
+    .knob{position:absolute;top:3px;left:3px;width:22px;height:22px;background:#fff;border-radius:50%;transition:left .2s}
+    .switch.on .knob{left:25px}
+    .logic{display:flex;align-items:center;gap:10px;margin-top:10px}
+    .logic-label{opacity:.8}
+    #background-animation{position:fixed;inset:0;pointer-events:none;background:radial-gradient(800px 400px at 10% 10%,rgba(35,134,54,.08),transparent),radial-gradient(1000px 600px at 90% 20%,rgba(56,139,253,.06),transparent)}
+    @media (max-width:720px){.status-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#21262d;border:1px solid #30363d;color:inherit;padding:10px 14px;border-radius:12px;opacity:0;pointer-events:none;transition:opacity .2s}
+    .toast.show{opacity:1}
+  </style>
 </head>
 <body>
   <div class="container">
@@ -134,7 +189,139 @@
     <p class="hint">Hinweis: Aktionen werden direkt an den Bot gesendet.</p>
   </div>
   <div id="background-animation"></div>
-  <script src="index.tsx"></script>
-<script type="module" src="/index.tsx"></script>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script>
+  (function(){
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.expand();
+      tg.enableClosingConfirmation();
+      // Theme-Farben automatisch übernehmen
+      if (tg.themeParams) {
+        document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#0e1116');
+        document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#e6edf3');
+      }
+    }
+
+    function sendData(obj){
+      const data = JSON.stringify(obj);
+      if (tg && tg.sendData) tg.sendData(data);
+      else console.log('sendData:', data);
+    }
+
+    // Fallback-Hinweis, wenn nicht in Telegram
+    if (!tg || !tg.sendData) {
+      console.warn('Telegram WebApp Kontext nicht erkannt. Senden per console.log aktiv.');
+    }
+
+    // generic action buttons
+    document.querySelectorAll('[data-action]')?.forEach(el => {
+      el.addEventListener('click', () => {
+        const payload = el.getAttribute('data-action');
+        try { sendData(JSON.parse(payload)); } catch(e) { console.error('Invalid action payload', e); }
+      });
+    });
+
+    function showToast(msg){
+      const t = document.getElementById('toast');
+      if (!t) return;
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>t.classList.remove('show'), 1600);
+    }
+
+    // segmented active-state toggle
+    document.querySelectorAll('.segmented .segment').forEach(seg => {
+      seg.addEventListener('click', () => {
+        const parent = seg.closest('.segmented');
+        parent?.querySelectorAll('.segment').forEach(s => s.classList.remove('active'));
+        seg.classList.add('active');
+      });
+    });
+
+    // Build 8 relay switches
+    const relaysEl = document.getElementById('relays');
+    if (relaysEl) {
+      for (let i = 1; i <= 8; i++) {
+        const item = document.createElement('div');
+        item.className = 'relay';
+        item.innerHTML = `<div class="meta"><span class="icon">⚡</span><span>Relay ${i}</span></div><div class="switch" data-index="${i}"><div class="knob"></div></div>`;
+        relaysEl.appendChild(item);
+      }
+      relaysEl.querySelectorAll('.switch').forEach(sw => {
+        sw.addEventListener('click', () => {
+          const idx = parseInt(sw.getAttribute('data-index'), 10);
+          const isOn = sw.classList.toggle('on');
+          sendData({ type: 'cmd', text: `/relay ${idx} ${isOn ? 'on' : 'off'}` });
+          setTimeout(()=> sendData({ type: 'cmd', text: '/app' }), 200);
+          showToast(`Relais ${idx} gesendet – aktualisiere…`);
+        });
+      });
+    }
+
+    // Save limits
+    document.getElementById('saveLimits')?.addEventListener('click', () => {
+      const phmin = document.getElementById('phmin').value;
+      const phmax = document.getElementById('phmax').value;
+      const tmin  = document.getElementById('tmin').value;
+      const tmax  = document.getElementById('tmax').value;
+      const hmin  = document.getElementById('hmin').value;
+      const hmax  = document.getElementById('hmax').value;
+      const cmds = [];
+      if (phmin) cmds.push(`/set phmin ${phmin}`);
+      if (phmax) cmds.push(`/set phmax ${phmax}`);
+      if (tmin)  cmds.push(`/set tmin ${tmin}`);
+      if (tmax)  cmds.push(`/set tmax ${tmax}`);
+      if (hmin)  cmds.push(`/set hmin ${hmin}`);
+      if (hmax)  cmds.push(`/set hmax ${hmax}`);
+      if (cmds.length) {
+        sendData({ type: 'batch', commands: cmds });
+        setTimeout(()=> sendData({ type: 'cmd', text: '/app' }), 200);
+        showToast('Grenzwerte gesendet – aktualisiere…');
+      }
+    });
+
+    // Refresh status via Telegram
+    document.getElementById('refreshStatus')?.addEventListener('click', () => {
+      const overlay = document.getElementById('status-loading');
+      overlay?.classList.remove('hidden');
+      sendData({ type: 'cmd', text: '/app' });
+      showToast('Aktualisiere Status…');
+      setTimeout(() => overlay?.classList.add('hidden'), 900);
+    });
+
+    // Initialstatus aus Query ?s=<base64(json))>
+    try {
+      const qp = new URLSearchParams(location.search);
+      const s = qp.get('s');
+      if (s) {
+        // base64 url-safe decode
+        const b64 = s.replace(/-/g,'+').replace(/_/g,'/');
+        const bin = atob(b64);
+        const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+        const text = new TextDecoder().decode(bytes);
+        const st = JSON.parse(text);
+        // Meterwerte befüllen
+        if (st.ph != null) document.getElementById('status-ph').textContent = String(st.ph);
+        if (st.aht_temp != null) document.getElementById('status-aht-temp').textContent = `${st.aht_temp} °C`;
+        if (st.aht_hum != null) document.getElementById('status-aht-humid').textContent = `${st.aht_hum} %`;
+        if (st.temp_1 != null) document.getElementById('status-ds-temp-1').textContent = `${st.temp_1} °C`;
+        if (Array.isArray(st.relays)) {
+          document.querySelectorAll('#relays .switch').forEach((sw, idx) => {
+            if (st.relays[idx]) sw.classList.add('on');
+            else sw.classList.remove('on');
+          });
+        }
+        if (st.relaylogic === 'active_high') {
+          document.querySelector('.segmented[data-group="relaylogic"] .segment.active')?.classList.remove('active');
+          document.querySelector('.segmented[data-group="relaylogic"] .segment[data-value="active_high"]')?.classList.add('active');
+        }
+      }
+    } catch(e) {
+      console.warn('Kein gültiger Initialstatus in URL', e);
+    }
+  })();
+  </script>
 </body>
 </html>
