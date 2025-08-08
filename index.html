@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScOpESens Mini App</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>ScOpESens</h1>
+    <p class="subtitle">Telegram Mini App</p>
+
+    <section class="card">
+      <h2>Aktionen</h2>
+      <div class="grid">
+        <button class="btn" data-action='{"type":"cmd","text":"/status"}'>📊 Status</button>
+        <button class="btn" data-action='{"type":"cmd","text":"/limits"}'>⚙️ Limits</button>
+        <button class="btn" data-action='{"type":"cmd","text":"/debug"}'>🐞 Debug Toggle</button>
+        <button class="btn" data-action='{"type":"cmd","text":"/loglevel 1"}'>🔈 Loglevel 1</button>
+        <button class="btn" data-action='{"type":"cmd","text":"/loglevel 2"}'>🔉 Loglevel 2</button>
+        <button class="btn" data-action='{"type":"cmd","text":"/loglevel 3"}'>🔊 Loglevel 3</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Grenzwerte</h2>
+      <div class="form">
+        <label>pH min <input id="phmin" type="number" step="0.01" placeholder="z.B. 6.50" /></label>
+        <label>pH max <input id="phmax" type="number" step="0.01" placeholder="z.B. 8.50" /></label>
+        <label>Temp min °C <input id="tmin" type="number" step="0.1" placeholder="z.B. 0.0" /></label>
+        <label>Temp max °C <input id="tmax" type="number" step="0.1" placeholder="z.B. 35.0" /></label>
+        <label>Feuchte min % <input id="hmin" type="number" step="0.1" placeholder="z.B. 20.0" /></label>
+        <label>Feuchte max % <input id="hmax" type="number" step="0.1" placeholder="z.B. 80.0" /></label>
+      </div>
+      <button id="saveLimits" class="btn primary">💾 Limits setzen</button>
+    </section>
+
+    <section class="card">
+      <h2>pH Kalibrierung</h2>
+      <div class="grid">
+        <button class="btn" data-action='{"type":"cmd","text":"/phcal read"}'>🧪 read</button>
+        <button class="btn" data-action='{"type":"cmd","text":"/phcal cal7"}'>🧪 cal7</button>
+        <button class="btn" data-action='{"type":"cmd","text":"/phcal cal4"}'>🧪 cal4</button>
+        <button class="btn" data-action='{"type":"cmd","text":"/phcal clear"}'>🧪 clear</button>
+        <button class="btn" data-action='{"type":"cmd","text":"/phcal begin"}'>🧪 2Pt begin</button>
+        <button class="btn" data-action='{"type":"cmd","text":"/phcal at7"}'>🧪 2Pt at7</button>
+        <button class="btn" data-action='{"type":"cmd","text":"/phcal at4"}'>🧪 2Pt at4</button>
+        <button class="btn" data-action='{"type":"cmd","text":"/phcal apply"}'>🧪 2Pt apply</button>
+        <button class="btn" data-action='{"type":"cmd","text":"/phcal state"}'>🧪 2Pt state</button>
+      </div>
+    </section>
+
+    <p class="hint">Hinweis: Diese Mini App verwendet Telegram WebApp sendData. Stelle sicher, dass dein Bot WebApp-Daten entgegennimmt.</p>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
+
+
